@@ -87,7 +87,7 @@ function jetpack_amp_post_template_metadata( $metadata, $post ) {
 		if ( class_exists( 'Jetpack_PostImages' ) ) {
 			$image = Jetpack_PostImages::get_image( $post->ID, array(
 				'fallback_to_avatars' => true,
-				'avatar_size' => 200,
+				'avatar_size' => 696,
 				// AMP already attempts these
 				'from_thumbnail' => false,
 				'from_attachment' => false,
