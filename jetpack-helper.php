@@ -69,3 +69,41 @@ function jetpack_amp_build_stats_pixel_url() {
 	$data = array_map( 'rawurlencode' , $data );
 	return add_query_arg( $data, 'https://pixel.wp.com/g.gif' );
 }
+
+/**
+ * Use Jetpack to find a fallback image
+ */
+function jetpack_amp_post_template_metadata( $metadata, $post ) {
+	// Fallback image to ensure every article has an image, as required
+	if ( ! isset( $metadata['image'] ) ) {
+		$metadata['image'] = array(
+			'@type' => 'ImageObject',
+			'url' => apply_filters( 'jetpack_amp_image_default', 'https://s0.wp.com/i/blank.jpg' ),
+			'width' => 200,
+			'height' => 200,
+		);
+
+		// Use Jetpack to get a better image, when possible
+		if ( class_exists( 'Jetpack_PostImages' ) ) {
+			$image = Jetpack_PostImages::get_image( $post->ID, array(
+				'fallback_to_avatars' => true,
+				'avatar_size' => 200,
+				// AMP already attempts these
+				'from_thumbnail' => false,
+				'from_attachment' => false,
+			) );
+
+			if ( ! empty( $image ) ) {
+				$metadata['image'] = array(
+					'@type' => 'ImageObject',
+					'url' => $image['src'],
+					'width' => $image['src_width'],
+					'height' => $image['src_height'],
+				);
+			}
+		}
+	}
+
+	return $metadata;
+}
+add_filter( 'amp_post_template_metadata', 'jetpack_amp_post_template_metadata', 10, 2 );
